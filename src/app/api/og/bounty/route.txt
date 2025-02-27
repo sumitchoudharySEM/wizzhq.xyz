@@ -1,0 +1,317 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable jsx-a11y/alt-text */
+// @ts-nocheck
+import { ImageResponse } from "@vercel/og";
+
+export const runtime = "edge";
+
+// Fetch and load the Poppins font
+// const poppinsRegular = fetch(
+//   new URL('https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJbecmNE.woff2')
+// ).then((res) => res.arrayBuffer());
+
+// const poppinsBold = fetch(
+//   new URL('https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2')
+// ).then((res) => res.arrayBuffer());
+
+// const poppinsExtraBold = fetch(
+//   new URL('https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLDD4Z1xlFQ.woff2')
+// ).then((res) => res.arrayBuffer());
+
+const popBold = fetch(
+  new URL(
+    "../../../../../public/fonts/poppins/Poppins-SemiBold.ttf",
+    import.meta.url
+  )
+).then((res) => res.arrayBuffer());
+
+const popReg = fetch(
+  new URL(
+    "../../../../../public/fonts/poppins/Poppins-Regular.ttf",
+    import.meta.url
+  )
+).then((res) => res.arrayBuffer());
+
+const popExBold = fetch(
+  new URL(
+    "../../../../../public/fonts/poppins/Poppins-ExtraBold.ttf",
+    import.meta.url
+  )
+).then((res) => res.arrayBuffer());
+
+// Move the fetch inside the GET function
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+
+    // Get all parameters with defaults
+    const title = searchParams.get("title") || "A Great Bounty For You";
+    const pname = searchParams.get("pname") || "Partner";
+    // const plogo = searchParams.get("plogo");
+    const type = searchParams.get("type") || "Bounty";
+    const location = searchParams.get("location") || "Global";
+
+    // Get prize amounts
+    const r1 = searchParams.get("r1") || "N/A";
+    const r2 = searchParams.get("r2") || "N/A";
+    const r3 = searchParams.get("r3") || "N/A";
+    const pb = searchParams.get("pb"); // Prize pool bonus
+
+    // Fetch all required assets
+    const [imagebg, p1, p2, p3, regularFont, boldFont, extraBoldFont] = await Promise.all([
+      fetch(new URL("../../../../../public/images/ogbg.png", import.meta.url)).then((res) => res.arrayBuffer()),
+      fetch(new URL("../../../../../public/images/1st_prize_icon.png", import.meta.url)).then((res) => res.arrayBuffer()),
+      fetch(new URL("../../../../../public/images/2nd_prize_icon.png", import.meta.url)).then((res) => res.arrayBuffer()),
+      fetch(new URL("../../../../../public/images/3rd_prize_icon.png", import.meta.url)).then((res) => res.arrayBuffer()),
+      popReg,
+      popBold,
+      popExBold,
+    ]);
+
+    const base64Image = Buffer.from(imagebg).toString("base64");
+    const dataUrl = `data:image/png;base64,${base64Image}`;
+
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            backgroundColor: "white",
+            backgroundImage: `url(${dataUrl})`,
+            paddingLeft: "218px",
+            paddingTop: "400px",
+            paddingRight: "420px",
+            paddingBottom: "195px",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          {/* Title Section */}
+          <div
+            style={{
+              marginBottom: "50px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "35px",
+            }}
+          >
+            {/* Partner Logo
+            {partnerLogo && (
+              <img
+                src={`data:image/png;base64,${Buffer.from(partnerLogo).toString("base64")}`}
+                width="230"
+                height="230"
+                style={{
+                  borderRadius: "35px",
+                }}
+              />
+            )} */}
+
+            <div
+              style={{
+                fontSize: "100px",
+                fontFamily: "Poppins",
+                fontWeight: 600,
+                color: "#1e293b",
+                lineHeight: "1.1",
+              }}
+            >
+              {title}
+            </div>
+
+            {/* Subtitle */}
+            <div
+              style={{
+                display: "flex",
+                gap: "24px",
+                alignItems: "center",
+                color: "#64748b",
+                fontSize: "56px",
+                fontFamily: "Poppins",
+                fontWeight: 400,
+              }}
+            >
+              <span>by {pname}</span>
+              <span>|</span>
+              <span>{type}</span>
+              <span>|</span>
+              <span>{location}</span>
+            </div>
+          </div>
+
+          {/* Prize Section */}
+          <div
+            style={{
+              marginTop: "80px",
+              display: "flex",
+              gap: "75px",
+              alignItems: "center",
+              fontFamily: "Poppins",
+              fontWeight: 600,
+            }}
+          >
+            {/* Show prizes only if they exist */}
+            {r1 !== "N/A" && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "22px",
+                }}
+              >
+                <img
+                  src={`data:image/png;base64,${Buffer.from(p1).toString(
+                    "base64"
+                  )}`}
+                  width="170"
+                  height="170"
+                />
+                <div
+                  style={{
+                    color: "#10b981",
+                    fontSize: "52px",
+                    fontFamily: "Poppins",
+                    fontWeight: 600,
+                  }}
+                >
+                  {r1}
+                </div>
+              </div>
+            )}
+
+            {r2 !== "N/A" && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "22px",
+                }}
+              >
+                <img
+                  src={`data:image/png;base64,${Buffer.from(p2).toString(
+                    "base64"
+                  )}`}
+                  width="170"
+                  height="170"
+                />
+                <div
+                  style={{
+                    color: "#10b981",
+                    fontSize: "52px",
+                    fontFamily: "Poppins",
+                    fontWeight: 600,
+                  }}
+                >
+                  {r2}
+                </div>
+              </div>
+            )}
+
+            {r3 !== "N/A" && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "22px",
+                }}
+              >
+                <img
+                  src={`data:image/png;base64,${Buffer.from(p3).toString(
+                    "base64"
+                  )}`}
+                  width="170"
+                  height="170"
+                />
+                <div
+                  style={{
+                    color: "#10b981",
+                    fontSize: "52px",
+                    fontFamily: "Poppins",
+                    fontWeight: 600,
+                  }}
+                >
+                  {r3}
+                </div>
+              </div>
+            )}
+
+            {/* Show prize pool bonus if it exists */}
+            {pb && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "22px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "170px",
+                    height: "170px",
+                    backgroundColor: "#10b981",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontSize: "40px",
+                    fontWeight: 600,
+                  }}
+                >
+                  MORE
+                </div>
+                <div
+                  style={{
+                    color: "#10b981",
+                    fontSize: "52px",
+                    fontFamily: "Poppins",
+                    fontWeight: 600,
+                  }}
+                >
+                  {pb}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ),
+      {
+        width: 2500,
+        height: 1600,
+        fonts: [
+          {
+            name: "Poppins",
+            data: regularFont,
+            weight: 400,
+            style: "normal",
+          },
+          {
+            name: "Poppins",
+            data: boldFont,
+            weight: 600,
+            style: "normal",
+          },
+          {
+            name: "Poppins",
+            data: extraBoldFont,
+            weight: 800,
+            style: "normal",
+          },
+        ],
+      }
+    );
+  } catch (e) {
+    console.error("Error:", e);
+    return new Response("failed to generate og image", { status: 500 });
+  }
+}

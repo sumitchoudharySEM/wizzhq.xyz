@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F8FAFC; 
+  --foreground: #171717;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  /* font-family: "Inter", sans-serif; */
+  /* background: var(--background);  */
+}
+
+/* Custom utility class */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Custom background utility for flexibility */
+  .bg-custom-light {
+    background-color: #F8FAFC;
+  }
+
+  .toastBody {
+    font-family: "Atlas Grotesk Web", Arial, Helvetica, sans-serif;
+    color: #10171D; /* #10171D */
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+}
+
+.ql-container.ql-snow {
+  min-height: 20rem !important;
+}
+
+/* Customizing h1, h2, h3, p, li, etc. inside the ReactQuill editor */
+.ql-editor h1 {
+  @apply text-3xl font-bold text-[#171717];
+}
+
+.ql-editor h2 {
+  @apply text-2xl font-semibold text-[#171717];
+}
+
+.ql-editor h3 {
+  @apply text-xl font-medium text-[#171717];
+}
+
+.ql-editor p {
+  @apply text-base text-[#171717] leading-relaxed;
+}
+
+.ql-editor li {
+  @apply text-base text-[#171717];
+}
+
+.ql-editor blockquote {
+  @apply border-l-4 pl-4 text-[#666] italic;
+}
+
+.navbar-name{
+  line-height: 16px;
+}
+.react-datepicker {
+  font-family: inherit;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+}
+
+.react-datepicker__header {
+  background-color: white;
+  border-bottom: 1px solid #f3f4f6;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  padding-top: 1rem;
+}
+
+.react-datepicker__day--selected {
+  background-color: #2FCC71 !important;
+  border-radius: 0.375rem;
+}
+
+.react-datepicker__day:hover {
+  background-color: #EFFFF1;
+  border-radius: 0.375rem;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #EFFFF1;
+  border-radius: 0.375rem;
+}
+
+.react-datepicker__time-container {
+  border-left: 1px solid #f3f4f6;
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: #2FCC71 !important;
+}
+
+.react-datepicker__triangle {
+  display: none;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  height: 38px; }
+
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+  
+  .react-datepicker__input-container {
+    width: 100%;
+  }
+  
+  .react-datepicker__input-container input {
+    width: 100%;
+    height: 38px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  
+  .react-datepicker__input-container input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(47, 204, 113, 0.2);
+    border-color: #2FCC71;
+  }
+  
+  /* Prevent layout shift */
+  .react-datepicker__input-container input:focus {
+    transition: none;
+    margin: 0;
+    position: relative;
+  }
+  
+  /* Ensure the calendar appears above other elements */
+  .react-datepicker-popper {
+    z-index: 40;
+  }
+  
+  /* Fix position of calendar */
+  .react-datepicker-left {
+    left: 0 !important;
+  }
+
+   /* Override Swiper default styles in your global CSS */
+.swiper {
+  width: 100% !important;  /* Ensure swiper container is 100% width */
+}
+
+.swiper-slide {
+  width: 100% !important;  /* Ensure each slide is 100% width */
+  flex-shrink: 0 !important; /* Prevent slides from shrinking */
+}
+
+.swiper-wrapper {
+  display: flex !important; /* Ensure proper flex layout */
+}
+
+.flex-slide {
+  display: flex !important;
+}
+
+
+
+  
