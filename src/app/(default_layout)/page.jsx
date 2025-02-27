@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import SearchbarFilter from "@/components/level_two_layout/searchbar_filter.jsx";
 import SingleListing from "@/components/listings/single_listing.jsx";
