@@ -2,7 +2,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const cta_partner = () => {
+const Cta_partner = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -159,4 +159,4 @@ const cta_partner = () => {
   );
 };
 
-export default cta_partner;
+export default Cta_partner;
