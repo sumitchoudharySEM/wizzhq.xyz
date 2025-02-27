@@ -8,7 +8,7 @@ import DefaultFooter from "@/components/level_one_layout/default_footer";
 import { BellAlertIcon } from "@heroicons/react/24/outline";
 import CommunityPartners from "@/components/level_two_layout/community_partners";
 
-export default function Home() {
+function HomePage() {
   const searchParams = useSearchParams();
   const [listings, setListings] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -248,5 +248,13 @@ export default function Home() {
         </>
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomePage />
+    </Suspense>
   );
 }
