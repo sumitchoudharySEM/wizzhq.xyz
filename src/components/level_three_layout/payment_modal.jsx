@@ -113,29 +113,10 @@ const PaymentModal = () => {
             <div className="mt-3 md:mt-6 space-y-4 md:space-y-6">
               <p className="text-sm md:text-base text-gray-700">
                 You have successfully created your bounty! Please make the payment of
-                <span className="font-bold"> {reward} {token} </span>
+                <span className="font-bold"> {reward + (reward >= 500 ? 50 + 0.1*reward : 0.2*reward)} {token} </span>
+                <span className="font-light">({reward} {token} Prize Pool + {reward >= 500 ? 50 + 0.1*reward : 0.2*reward} {token} Platform Fees and Operational Cost) </span>
                 to one of the following addresses.
               </p>
-
-              <div className="space-y-2">
-                <label className="text-xs md:text-sm font-medium text-gray-700">Solana:</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={addresses.solana}
-                    readOnly
-                    className="flex-1 px-3 py-2 text-xs md:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-600 focus:outline-none"
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => copyToClipboard(addresses.solana, 'solana')}
-                    className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    {copiedSolana ? <CheckIcon className="w-5 h-5 text-green-500" /> : <ClipboardDocumentIcon className="w-5 h-5 text-gray-500" />}
-                  </motion.button>
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <label className="text-xs md:text-sm font-medium text-gray-700">Polygon, Base, and other EVM chains:</label>
@@ -156,6 +137,27 @@ const PaymentModal = () => {
                   </motion.button>
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-xs md:text-sm font-medium text-gray-700">Solana:</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={addresses.solana}
+                    readOnly
+                    className="flex-1 px-3 py-2 text-xs md:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-600 focus:outline-none"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => copyToClipboard(addresses.solana, 'solana')}
+                    className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    {copiedSolana ? <CheckIcon className="w-5 h-5 text-green-500" /> : <ClipboardDocumentIcon className="w-5 h-5 text-gray-500" />}
+                  </motion.button>
+                </div>
+              </div>
+              
 
               <p className="text-sm md:text-base text-gray-700">
                 Your bounty will not be verified or made public until the full payment is received. For any assistance, feel free to contact our team.
