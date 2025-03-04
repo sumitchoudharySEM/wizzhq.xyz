@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
+export const dynamic = 'auto'; // Default: static unless dynamic features are used
+export const fetchCache = 'auto'; // Default caching behavior
 
 import { Suspense } from 'react';
 import Home from './homepage';
