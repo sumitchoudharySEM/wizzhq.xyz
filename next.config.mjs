@@ -6,32 +6,27 @@ const nextConfig = {
       'avatars.githubusercontent.com',
       'res.cloudinary.com',
       'wizzhq.xyz',
-      'localhost'
     ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'wizzhq.xyz',
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      }
+      // Remove localhost in production; only use in dev if needed
     ],
-    unoptimized: true,
+    unoptimized: true, // Keep this since Apache serves static files
   },
-  experimental: { // [!code ++] // [!code focus]
-    serverComponentsExternalPackages: ['grammy'], // [!code ++] // [!code focus]
-  }, // [!code ++] // [!code focus]
-  // Add this to ensure static file serving works correctly
+  experimental: {
+    serverComponentsExternalPackages: ['grammy'],
+  },
+  // Remove unnecessary rewrites since Apache handles /uploads/
   async rewrites() {
-    return [
-      {
-        source: '/uploads/:path*',
-        destination: '/uploads/:path*',
-      },
-    ];
+    return [];
   },
-}
+  // Optional: Add basePath or env for consistent URLs
+  env: {
+    NEXT_PUBLIC_BASE_URL: 'https://wizzhq.xyz',
+  },
+};
 
 export default nextConfig;
