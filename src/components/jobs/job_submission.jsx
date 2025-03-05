@@ -319,17 +319,32 @@ const JobSubmission = ({
     const fetchQuestions = async () => {
       try {
         const response = await fetch(`/api/jobs/create_job?slug=${jobSlug}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        if (data.job.questionnaire) {
-          const parsedQuestionnaire = JSON.parse(data.job.questionnaire);
-          setQuestions(parsedQuestionnaire.questions);
+        if (data.job && data.job.questionnaire) {
+          try {
+            const questionnaire = typeof data.job.questionnaire === "string"
+              ? JSON.parse(data.job.questionnaire)
+              : data.job.questionnaire;
+            setQuestions(questionnaire.questions || []);
+          } catch (parseError) {
+            console.error("Error parsing questionnaire:", parseError);
+            toast.error("Invalid questionnaire format");
+            setQuestions([]);
+          }
+        } else {
+          console.warn("No questionnaire found for job:", jobSlug);
+          setQuestions([]);
         }
       } catch (error) {
         console.error("Error fetching questions:", error);
         toast.error("Failed to load questionnaire");
+        setQuestions([]);
       }
     };
-
+  
     if (jobSlug) {
       fetchQuestions();
     }
