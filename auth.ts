@@ -7,7 +7,8 @@ import { headers } from "next/headers";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google, GitHub, Twitter],
   trustHost: true,
-  secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
+  // secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async signIn({ user }) {
       if (!user.email) {
@@ -17,14 +18,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       try {
         // Extract cookies from headers (server-side request)
-        const headerStore = headers();
-        const cookieHeader = headerStore.get("cookie") || "";
-        const referralCode = cookieHeader
-          .split("; ")
-          .find((row) => row.startsWith("referralCode="))
-          ?.split("=")[1];
+        // const headerStore = headers();
+        // const cookieHeader = headerStore.get("cookie") || "";
+        // const referralCode = cookieHeader
+        //   .split("; ")
+        //   .find((row) => row.startsWith("referralCode="))
+        //   ?.split("=")[1];
 
-        console.log("Referral code extracted from headers:", referralCode);
+        // console.log("Referral code extracted from headers:", referralCode);
 
         // Check if user exists
         const response = await fetch(`${process.env.NEXTAUTH_URL}/api/users?email=${encodeURIComponent(user.email)}`, {
@@ -56,35 +57,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const newUser = await createResponse.json();
 
-          const requests = [
-            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/points/referral_code`, {
-              method: "POST",
-              headers: {
-              "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId: newUser.user.id }),
-            }),
-          ];
+          // const requests = [
+          //   fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/points/referral_code`, {
+          //     method: "POST",
+          //     headers: {
+          //     "Content-Type": "application/json",
+          //     },
+          //     body: JSON.stringify({ userId: newUser.user.id }),
+          //   }),
+          // ];
 
-          if (referralCode) {
-            requests.push(
-              fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/points/process_referral`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId: newUser.user.id,
-                referralCode: referralCode,
-              }),
-            })
-            );
-          }
+          // if (referralCode) {
+          //   requests.push(
+          //     fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/points/process_referral`, {
+          //     method: "POST",
+          //     headers: {
+          //       "Content-Type": "application/json",
+          //     },
+          //     body: JSON.stringify({
+          //       userId: newUser.user.id,
+          //       referralCode: referralCode,
+          //     }),
+          //   })
+          //   );
+          // }
 
-          await Promise.all(requests).catch(error => {
-            console.error("Error in parallel operations:", error);
-            throw new Error("Failed to process referral");
-          });
+          // await Promise.all(requests).catch(error => {
+          //   console.error("Error in parallel operations:", error);
+          //   throw new Error("Failed to process referral");
+          // });
         }
 
         return true;
