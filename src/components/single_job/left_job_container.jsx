@@ -121,11 +121,13 @@ const LeftJobContainer = ({
           "Content-Type": "application/json",
         },
       });
+  
       const data = await response.json();
       if (!response.ok) {
-        toast.error("failed to get submissions");
+        toast.error("Failed to get submissions");
         throw new Error(data.error || "Failed to update user");
       }
+  
       if (data.submissions) {
         const allMySub = data.submissions.filter(
           (submission) => submission.user_id === session?.user?.id
@@ -134,12 +136,32 @@ const LeftJobContainer = ({
         if (allMySub.length > 0) {
           const mySub = allMySub[0];
   
-          // parse JSON string fields
-          mySub.default_answers = JSON.parse(mySub.default_answers);
-          mySub.questionnaire_answers = JSON.parse(mySub.questionnaire_answers);
+          // Safely parse or assign default_answers
+          try {
+            mySub.default_answers =
+              typeof mySub.default_answers === "string"
+                ? JSON.parse(mySub.default_answers)
+                : mySub.default_answers || {};
+          } catch (parseError) {
+            console.error("Error parsing default_answers:", parseError);
+            mySub.default_answers = {}; // Fallback to empty object
+            toast.error("Invalid default answers format");
+          }
+  
+          // Safely parse or assign questionnaire_answers
+          try {
+            mySub.questionnaire_answers =
+              typeof mySub.questionnaire_answers === "string"
+                ? JSON.parse(mySub.questionnaire_answers)
+                : mySub.questionnaire_answers || {};
+          } catch (parseError) {
+            console.error("Error parsing questionnaire_answers:", parseError);
+            mySub.questionnaire_answers = {}; // Fallback to empty object
+            toast.error("Invalid questionnaire answers format");
+          }
   
           setMySubmission(mySub);
-          console.log(mySub);
+          console.log("Parsed submission:", mySub);
         }
   
         setTotalSubmission(data.submissions.length);
