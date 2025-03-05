@@ -287,9 +287,10 @@ export default function JobForm() {
         try {
           const response = await fetch(`/api/jobs/edit_job?slug=${slug}`);
           if (!response.ok) throw new Error("Failed to fetch job data");
-
+  
           const data = await response.json();
-
+  
+          // Initialize form data with defaults
           setFormData({
             title: data.job.title || "",
             categories: data.job.categories || "",
@@ -307,14 +308,14 @@ export default function JobForm() {
             maxAmount: data.job.max_amount || "",
             fixedAmount: data.job.fixed_amount || "",
             paymentPeriod: data.job.payment_period || "",
-            questionnaire: data.job.questionnaire || { questions: [] },
+            questionnaire: data.job.questionnaire || { questions: [] }, // Default in case parsing fails
           });
-
+  
           setValue(data.job.detailed_description || "");
           setRequirementsValue(data.job.requirements || "");
           setJob_PerksValue(data.job.job_perks || "");
           setRoles_ResponsibilityValue(data.job.roles_responsibility || "");
-
+  
           if (data.job.categories) {
             setSelectedCategory(
               categoryOptions.find((opt) => opt.value === data.job.categories)
@@ -332,27 +333,40 @@ export default function JobForm() {
               )
             );
           }
+  
+          // Safely handle questionnaire parsing
           if (data.job.questionnaire) {
-            const parsedQuestionnaire = JSON.parse(data.job.questionnaire);
-            setFormData((prev) => ({
-              ...prev,
-              questionnaire: parsedQuestionnaire,
-            }));
+            try {
+              const parsedQuestionnaire =
+                typeof data.job.questionnaire === "string"
+                  ? JSON.parse(data.job.questionnaire)
+                  : data.job.questionnaire;
+              setFormData((prev) => ({
+                ...prev,
+                questionnaire: parsedQuestionnaire || { questions: [] },
+              }));
+            } catch (parseError) {
+              console.error("Error parsing questionnaire:", parseError);
+              setFormData((prev) => ({
+                ...prev,
+                questionnaire: { questions: [] }, // Fallback to empty questionnaire
+              }));
+              toast.error("Invalid questionnaire format");
+            }
           }
+  
+          // Handle skills parsing
           const skillsArray = data.job?.skills
             ? data.job.skills.split(",").map((skill) => {
                 return (
-                  skillOptions.find(
-                    (option) => option.value === skill.trim()
-                  ) || null
+                  skillOptions.find((option) => option.value === skill.trim()) ||
+                  null
                 );
               })
             : [];
           setSelectedOptions(skillsArray);
           setSelectedOptionStrings(data.job?.skills || "");
-
-          setSelectedOptions(skillsArray);
-          setSelectedOptionStrings(data.job.skills || "");
+  
         } catch (error) {
           console.error("Error loading job data:", error);
           toast.error("Failed to load job data");
@@ -360,7 +374,7 @@ export default function JobForm() {
       }
       setIsLoading(false);
     };
-
+  
     loadJobData();
   }, [isEditing, slug]);
 
