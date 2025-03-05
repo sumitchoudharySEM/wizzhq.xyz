@@ -31,7 +31,7 @@ const CongratulationsModal = ({
   if (!isOpen) return null;
 
   const handleTwitterShare = () => {
-    const tweetText = `🚀 Just took a big step towards my career goals! Applied for "${jobTitle}" on Wizz.\n\n Excited for new challenges and opportunities ahead! 💼✨ \n\n #WizzHQ #JobSearch #CareerGrowth #NewBeginnings`;
+    const tweetText = `Just took a big step toward my career goals 💪 Applied for the job "${jobTitle}" on @WizzHQ.\n\n Excited for new challenges and opportunities ahead!`;
 
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       tweetText
@@ -74,7 +74,7 @@ const CongratulationsModal = ({
 
         <div className="flex flex-col gap-5 items-center">
           <h1 className="text-base md:text-[17px] font-medium text-[#424558] leading-7">
-            Your application is in! 🎉 Winners coming soon—till then, spread the
+            Your application is in! Winners coming soon—till then, spread the
             word and share your submissions with friends!{" "}
           </h1>
 
