@@ -15,6 +15,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(true);
   const [filteredListings, setFilteredListings] = React.useState([]);
   const [filteredJobs, setFilteredJobs] = React.useState([]);
+  const [combinedItems, setCombinedItems] = React.useState([]);
   const [selectedStatus, setSelectedStatus] = React.useState(null);
   const [selectedCategory, setSelectedCategory] = React.useState(null);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -22,7 +23,6 @@ export default function Home() {
 
   const fetchListings = async () => {
     try {
-      setLoading(true);
       const response = await fetch(`/api/bounties`, {
         method: "GET",
         headers: {
@@ -46,15 +46,12 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching listing data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   //fetch jobs from the server
   const fetchJobs = async () => {
     try {
-      setLoading(true);
       const response = await fetch(`/api/jobs/all_jobs`, {
         method: "GET",
         headers: {
@@ -63,19 +60,35 @@ export default function Home() {
       });
       const data = await response.json();
       const fetchedJobs = data.jobs || [];
-      setJobs(fetchedJobs.filter(job => job.verified === 1));
-      setFilteredJobs(fetchedJobs.filter(job => job.verified === 1));
+
+      // Only show jobs created by the current user (no verification check)
+      if (session?.user?.id) {
+        const userJobs = fetchedJobs.filter(
+          (job) => job.creator_id === session.user.id
+        );
+        setJobs(userJobs);
+        setFilteredJobs(userJobs);
+      } else {
+        setJobs([]);
+        setFilteredJobs([]);
+      }
     } catch (error) {
       console.error("Error fetching jobs data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   React.useEffect(() => {
-    fetchListings();
-    fetchJobs();
-  }, [session]); // Add session as dependency to refetch when auth state changes
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchListings(), fetchJobs()]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [session]);
 
   // Check the status of a listing whether it is active or completed
   const checkListingStatus = React.useCallback((listing) => {
@@ -87,7 +100,7 @@ export default function Home() {
     return currentDate > endDate ? "completed" : "active";
   }, []);
 
-  // Check the status of a listing whether it is active or completed
+  // Check the status of a job whether it is active or completed
   const checkJobStatus = React.useCallback((job) => {
     if (!job.end_date) return "active";
     const currentDate = new Date();
@@ -121,74 +134,20 @@ export default function Home() {
     []
   );
 
-  // Filter listings based on selected status, category, and search term
-  // React.useEffect(() => {
-  //   const filterListings = async () => {
-  //     if (isSearching) return; // Prevent multiple simultaneous searches
+  // Get the time remaining in days between now and the end date
+  const getTimeRemaining = React.useCallback((endDateString) => {
+    if (!endDateString) return Infinity; // Items without end date should appear last
 
-  //     setIsSearching(true);
-  //     let filtered = [...listings];
+    const currentDate = new Date();
+    const endDate = new Date(endDateString);
+    currentDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
 
-  //     // Filter by status
-  //     if (selectedStatus) {
-  //       filtered = filtered.filter((listing) => {
-  //         const listingStatus = checkListingStatus(listing);
-  //         return listingStatus === selectedStatus;
-  //       });
-  //     }
+    const differenceInTime = endDate.getTime() - currentDate.getTime();
+    const differenceInDays = differenceInTime / (1000 * 3600 * 24);
 
-  //     // Filter by category
-  //     if (selectedCategory) {
-  //       filtered = filtered.filter(
-  //         (listing) => listing.categories === selectedCategory
-  //       );
-  //     }
-
-  //     // Filter by search term
-  //     if (searchTerm) {
-  //       const searchResults = await Promise.all(
-  //         filtered.map(async (listing) => {
-  //           const matchesTitle = listing.title
-  //             ?.toLowerCase()
-  //             .includes(searchTerm.toLowerCase());
-  //           const matchesDescription = listing.short_description
-  //             ?.toLowerCase()
-  //             .includes(searchTerm.toLowerCase());
-  //           const matchesPartner = await checkPartnerNameMatch(
-  //             listing.partner_id,
-  //             searchTerm
-  //           );
-
-  //           return matchesTitle || matchesDescription || matchesPartner
-  //             ? listing
-  //             : null;
-  //         })
-  //       );
-
-  //       filtered = searchResults.filter((result) => result !== null);
-  //     }
-
-  //     setFilteredListings(filtered);
-  //     setIsSearching(false);
-  //   };
-    
-  //   // Debounce the filter operation
-  //   const timeoutId = setTimeout(() => {
-  //     filterListings();
-  //   }, 300); // Wait 300ms after last change before filtering
-
-  //   // Cleanup function
-  //   return () => {
-  //     clearTimeout(timeoutId);
-  //   };
-  // }, [
-  //   listings,
-  //   selectedStatus,
-  //   selectedCategory,
-  //   searchTerm,
-  //   checkListingStatus,
-  //   checkPartnerNameMatch,
-  // ]);
+    return differenceInDays;
+  }, []);
 
   React.useEffect(() => {
     const filterItems = async () => {
@@ -201,43 +160,64 @@ export default function Home() {
       // Apply status filter
       if (selectedStatus) {
         newFilteredListings = newFilteredListings.filter(
-          listing => checkListingStatus(listing) === selectedStatus
+          (listing) => checkListingStatus(listing) === selectedStatus
         );
         newFilteredJobs = newFilteredJobs.filter(
-          job => checkJobStatus(job) === selectedStatus
+          (job) => checkJobStatus(job) === selectedStatus
         );
       }
 
       // Apply category filter
       if (selectedCategory) {
         newFilteredListings = newFilteredListings.filter(
-          listing => listing.categories === selectedCategory
+          (listing) => listing.categories === selectedCategory
         );
         newFilteredJobs = newFilteredJobs.filter(
-          job => job.categories === selectedCategory
+          (job) => job.categories === selectedCategory
         );
       }
 
       // Apply search filter
       if (searchTerm) {
-        const filteredListingsPromises = newFilteredListings.map(async (listing) => {
-          const matchesTitle = listing.title?.toLowerCase().includes(searchTerm.toLowerCase());
-          const matchesDescription = listing.short_description?.toLowerCase().includes(searchTerm.toLowerCase());
-          const matchesPartner = await checkPartnerNameMatch(listing.partner_id, searchTerm);
-          return matchesTitle || matchesDescription || matchesPartner ? listing : null;
-        });
+        const filteredListingsPromises = newFilteredListings.map(
+          async (listing) => {
+            const matchesTitle = listing.title
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+            const matchesDescription = listing.short_description
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+            const matchesPartner = await checkPartnerNameMatch(
+              listing.partner_id,
+              searchTerm
+            );
+            return matchesTitle || matchesDescription || matchesPartner
+              ? listing
+              : null;
+          }
+        );
 
         const filteredJobsPromises = newFilteredJobs.map(async (job) => {
-          const matchesTitle = job.title?.toLowerCase().includes(searchTerm.toLowerCase());
-          const matchesDescription = job.description?.toLowerCase().includes(searchTerm.toLowerCase());
-          const matchesPartner = await checkPartnerNameMatch(job.partner_id, searchTerm);
-          return matchesTitle || matchesDescription || matchesPartner ? job : null;
+          const matchesTitle = job.title
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase());
+          const matchesDescription = job.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase());
+          const matchesPartner = await checkPartnerNameMatch(
+            job.partner_id,
+            searchTerm
+          );
+          return matchesTitle || matchesDescription || matchesPartner
+            ? job
+            : null;
         });
 
-        const [filteredListingsResults, filteredJobsResults] = await Promise.all([
-          Promise.all(filteredListingsPromises),
-          Promise.all(filteredJobsPromises)
-        ]);
+        const [filteredListingsResults, filteredJobsResults] =
+          await Promise.all([
+            Promise.all(filteredListingsPromises),
+            Promise.all(filteredJobsPromises),
+          ]);
 
         newFilteredListings = filteredListingsResults.filter(Boolean);
         newFilteredJobs = filteredJobsResults.filter(Boolean);
@@ -245,6 +225,29 @@ export default function Home() {
 
       setFilteredListings(newFilteredListings);
       setFilteredJobs(newFilteredJobs);
+
+      // Combine and sort listings and jobs by end date (soonest to latest)
+      const combinedItems = [
+        ...newFilteredListings.map((item) => ({ ...item, type: "listing" })),
+        ...newFilteredJobs.map((item) => ({ ...item, type: "job" })),
+      ].sort((a, b) => {
+        const statusA =
+          a.type === "listing" ? checkListingStatus(a) : checkJobStatus(a);
+        const statusB =
+          b.type === "listing" ? checkListingStatus(b) : checkJobStatus(b);
+
+        // If status is different, active comes before completed
+        if (statusA !== statusB) {
+          return statusA === "active" ? -1 : 1;
+        }
+
+        // If both have same status, sort by end date
+        const timeRemainingA = getTimeRemaining(a.end_date);
+        const timeRemainingB = getTimeRemaining(b.end_date);
+        return timeRemainingA - timeRemainingB;
+      });
+
+      setCombinedItems(combinedItems);
       setIsSearching(false);
     };
 
@@ -253,7 +256,18 @@ export default function Home() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [listings, jobs, selectedStatus, selectedCategory, searchTerm, isSearching, checkListingStatus, checkJobStatus, checkPartnerNameMatch]);
+  }, [
+    listings,
+    jobs,
+    selectedStatus,
+    selectedCategory,
+    searchTerm,
+    isSearching,
+    checkListingStatus,
+    checkJobStatus,
+    checkPartnerNameMatch,
+    getTimeRemaining,
+  ]);
 
   // Handler for selecting status
   const handleStatusChange = React.useCallback((status) => {
@@ -273,7 +287,7 @@ export default function Home() {
   return (
     <div className="mt-6 mb-5">
       {/* Loading Overlay */}
-      {/* {loading && (
+      {loading && (
         <div className="w-full min-h-[90vh] flex items-center justify-center z-50 bg-[#F8FAFC] backdrop-blur-md">
           <iframe
             src="https://lottie.host/embed/0e906fb1-4db8-4ee5-83a1-571bf2354be3/swOYAUc0eE.json"
@@ -281,9 +295,9 @@ export default function Home() {
             className="w-24 h-24"
           ></iframe>
         </div>
-      )} */}
+      )}
 
-      {/* {!loading && ( */}
+      {!loading && (
         <>
           <div className="mb-5">
             <Ctapartner />
@@ -297,36 +311,29 @@ export default function Home() {
           />
 
           {/* Show alert if no listings and no jobs after filtering */}
-          {(!filteredListings.length && !filteredJobs.length) ? (
+          {combinedItems.length === 0 ? (
             <div className="flex flex-col items-center gap-3 lg:gap-5 mt-20">
               <BellAlertIcon className="w-[3.5rem] h-[3.5rem] lg:w-[5rem] lg:h-[5rem] text-[#2dc653]" />
               <div className="flex flex-col items-center gap-2 md:gap-3">
                 <h1 className="text-2xl lg:text-[27px] leading-8 font-bold text-[#2aba4e] text-center">
-                  It's Quiet Here—Time to Add a Bounty or Hire new Talen!
+                  It's Quiet Here—Time to Add a Bounty or Hire new Talent!
                 </h1>
                 <p className="text-base lg:text-[17px] leading-5 font-normal text-[#3E3E3E] text-center">
-                  Create your first bounty or initiate a hiring to engage with the community.
+                  Create your first bounty or initiate a hiring to engage with
+                  the community.
                 </p>
               </div>
             </div>
           ) : (
-            <>
-            {filteredListings.length > 0 && (
             <div className="my-6 grid gap-[2rem] grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filteredListings.map((listing) => (
-                <SingleListing key={listing.id} listing={listing} />
-              ))}
+              {combinedItems.map((item) =>
+                item.type === "listing" ? (
+                  <SingleListing key={`listing-${item.id}`} listing={item} />
+                ) : (
+                  <SingleJob key={`job-${item.id}`} job={item} />
+                )
+              )}
             </div>
-            )}
-
-            {filteredJobs.length > 0 && (
-            <div className="my-6 grid gap-[2rem] grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filteredJobs.map((job) => (
-                <SingleJob key={job.id} job={job} />
-              ))}
-            </div>
-            )}
-            </>
           )}
 
           <div className="mt-8 mb-9 md:mt-11 md:mb-7">
@@ -344,7 +351,7 @@ export default function Home() {
             </div>
           </div>
         </>
-      {/* )} */}
+      )}
     </div>
   );
 }

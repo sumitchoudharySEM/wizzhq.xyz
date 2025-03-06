@@ -28,7 +28,6 @@ const DefaultSidebar = () => {
     setActiveItem(item);
   };
 
-
   return (
     <div
       className={`h-screen bg-white shadow-lg flex flex-col ${
@@ -47,8 +46,16 @@ const DefaultSidebar = () => {
           className={`text-2xl font-bold text-gray-800 ${
             isCollapsed ? "hidden" : "block"
           }`}
-        > <Link href="/" passHref>
-          <Image height={55} width={110} src="/images/logo.png" alt="wizz" className="transition-all duration-300 ease-in-out" />
+        >
+          {" "}
+          <Link href="/" passHref>
+            <Image
+              height={55}
+              width={110}
+              src="/images/logo.png"
+              alt="wizz"
+              className="transition-all duration-300 ease-in-out"
+            />
           </Link>
         </h1>
       </div>
@@ -57,134 +64,131 @@ const DefaultSidebar = () => {
         <ul>
           {/* Overview */}
           <Link href="/">
-          <li
-            onClick={() => handleActiveItem("overview")}
-            className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
-              activeItem === "overview"
-                ? " text-green-500"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            {activeItem === "overview" && (
-              <div className="absolute left-0 h-10 w-[5.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
-            )}
-            <HomeIcon
-              className={`h-6 w-6 transition-colors duration-300 ease-in-out ${
-                activeItem === "overview" ? "text-green-500" : "text-gray-500"
-              } ${isCollapsed ? "mx-auto" : "mr-4"}`}
-            />
-            {!isCollapsed && (
-              <span
-                className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
-                  activeItem === "overview"
-                    ? "text-green-500 font-semibold"
-                    : ""
-                }`}
-              >
-                Overview
-              </span>
-            )}
-          </li>
+            <li
+              onClick={() => handleActiveItem("overview")}
+              className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
+                activeItem === "overview"
+                  ? " text-green-500"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {activeItem === "overview" && (
+                <div className="absolute left-0 h-10 w-[5.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
+              )}
+              <HomeIcon
+                className={`h-6 w-6 transition-colors duration-300 ease-in-out ${
+                  activeItem === "overview" ? "text-green-500" : "text-gray-500"
+                } ${isCollapsed ? "mx-auto" : "mr-4"}`}
+              />
+              {!isCollapsed && (
+                <span
+                  className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
+                    activeItem === "overview"
+                      ? "text-green-500 font-semibold"
+                      : ""
+                  }`}
+                >
+                  Overview
+                </span>
+              )}
+            </li>
           </Link>
 
           {/* Bounties */}
-          <Link href="/">
-          <li
-            onClick={() => handleActiveItem("bounties")}
-            className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
-              activeItem === "bounties"
-                ? " text-green-500"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            {activeItem === "bounties" && (
-              <div className="absolute left-0 h-10 w-[5.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
-            )}
-            <BriefcaseIcon
-              className={`h-6 w-6 transition-colors duration-300 ease-in-out ${
-                activeItem === "bounties" ? "text-green-500" : "text-gray-500"
-              } ${isCollapsed ? "mx-auto" : "mr-4"}`}
-            />
-            {!isCollapsed && (
-              <span
-                className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
-                  activeItem === "bounties"
-                    ? "text-green-500 font-semibold"
-                    : ""
-                }`}
-              >
-                Bounties
-              </span>
-            )}
-          </li>
+          <Link href="/bounty">
+            <li
+              onClick={() => handleActiveItem("bounties")}
+              className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
+                activeItem === "bounties"
+                  ? " text-green-500"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {activeItem === "bounties" && (
+                <div className="absolute left-0 h-10 w-[5.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
+              )}
+              <BriefcaseIcon
+                className={`h-6 w-6 transition-colors duration-300 ease-in-out ${
+                  activeItem === "bounties" ? "text-green-500" : "text-gray-500"
+                } ${isCollapsed ? "mx-auto" : "mr-4"}`}
+              />
+              {!isCollapsed && (
+                <span
+                  className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
+                    activeItem === "bounties"
+                      ? "text-green-500 font-semibold"
+                      : ""
+                  }`}
+                >
+                  Bounties
+                </span>
+              )}
+            </li>
           </Link>
 
           {/* Hirings */}
           <Link href="/hirings">
-          <li
-            onClick={() => {
-              handleActiveItem("hirings")
-              // toast.info(
-              //   "Feature Under Development! Stay tuned for updates.",
-              //   {
-              //     position: "top-center",
-              //     autoClose: 5000,
-              //     hideProgressBar: false,
-              //     closeOnClick: true,
-              //     pauseOnHover: true,
-              //     draggable: true,
-              //     progress: undefined,
-              //     theme: "light",
-              //     transition: Slide,
-              //   }
-              // );
-            }}
-            className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
-              activeItem === "hirings"
-                ? " text-green-500"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            {activeItem === "hirings" && (
-              <div className="absolute left-0 h-10 w-[5.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
-            )}
-            <UserGroupIcon
-              className={`h-6 w-6 transition-colors duration-300 ease-in-out ${
-                activeItem === "hirings" ? "text-green-500" : "text-gray-500"
-              } ${isCollapsed ? "mx-auto" : "mr-4"}`}
-            />
-            {!isCollapsed && (
-              <span
-                className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
-                  activeItem === "hirings"
-                    ? "text-green-500 font-semibold"
-                    : ""
-                }`}
-              >
-                Hirings
-              </span>
-            )}
-          </li>
+            <li
+              onClick={() => {
+                handleActiveItem("hirings");
+                // toast.info(
+                //   "Feature Under Development! Stay tuned for updates.",
+                //   {
+                //     position: "top-center",
+                //     autoClose: 5000,
+                //     hideProgressBar: false,
+                //     closeOnClick: true,
+                //     pauseOnHover: true,
+                //     draggable: true,
+                //     progress: undefined,
+                //     theme: "light",
+                //     transition: Slide,
+                //   }
+                // );
+              }}
+              className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
+                activeItem === "hirings"
+                  ? " text-green-500"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {activeItem === "hirings" && (
+                <div className="absolute left-0 h-10 w-[5.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
+              )}
+              <UserGroupIcon
+                className={`h-6 w-6 transition-colors duration-300 ease-in-out ${
+                  activeItem === "hirings" ? "text-green-500" : "text-gray-500"
+                } ${isCollapsed ? "mx-auto" : "mr-4"}`}
+              />
+              {!isCollapsed && (
+                <span
+                  className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
+                    activeItem === "hirings"
+                      ? "text-green-500 font-semibold"
+                      : ""
+                  }`}
+                >
+                  Hirings
+                </span>
+              )}
+            </li>
           </Link>
 
           {/* Projects */}
           <li
             onClick={() => {
-              handleActiveItem("projects")
-              toast.info(
-                "Feature Under Development! Stay tuned for updates.",
-                {
-                  position: "top-center",
-                  autoClose: 5000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "light",
-                  transition: Slide,
-                }
-              );
+              handleActiveItem("projects");
+              toast.info("Feature Under Development! Stay tuned for updates.", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Slide,
+              });
             }}
             className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
               activeItem === "projects"
@@ -216,26 +220,21 @@ const DefaultSidebar = () => {
           {/* Grants */}
           <li
             onClick={() => {
-              handleActiveItem("grants")
-              toast.info(
-                "Feature Under Development! Stay tuned for updates.",
-                {
-                  position: "top-center",
-                  autoClose: 5000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "light",
-                  transition: Slide,
-                }
-              );
+              handleActiveItem("grants");
+              toast.info("Feature Under Development! Stay tuned for updates.", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Slide,
+              });
             }}
             className={`relative flex items-center p-4 cursor-pointer transition-all duration-300 ease-in-out ${
-              activeItem === "grants"
-                ? " text-green-500"
-                : "hover:bg-gray-100"
+              activeItem === "grants" ? " text-green-500" : "hover:bg-gray-100"
             }`}
           >
             {activeItem === "grants" && (
@@ -249,9 +248,7 @@ const DefaultSidebar = () => {
             {!isCollapsed && (
               <span
                 className={`text-lg text-gray-500 transition-all duration-300 ease-in-out ${
-                  activeItem === "grants"
-                    ? "text-green-500 font-semibold"
-                    : ""
+                  activeItem === "grants" ? "text-green-500 font-semibold" : ""
                 }`}
               >
                 Grants

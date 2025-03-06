@@ -11,10 +11,32 @@ export async function GET(request: NextRequest) {
   try {
     connection = await createConnection();
 
-    const [jobs] = await connection.query("SELECT * FROM jobs");
+    const [jobs] = await connection.query(`
+      SELECT 
+        l.id,
+        l.title,
+        l.slug,
+        l.creator_id,
+        l.reward,
+        l.verified,
+        l.categories,
+        l.location,
+        l.type,
+        l.partner_id,
+        l.end_date,
+        l.short_description,
+        l.payment_type,
+        l.fixed_amount,
+        l.max_amount,
+        l.min_amount,
+        p.name AS partner_name,
+        p.profile_photo_url AS partner_profile_photo_url
+      FROM jobs l
+      LEFT JOIN partners p ON l.partner_id = p.id
+    `);
 
-    if (jobs.length === 0) {
-      return NextResponse.json({ listings: null });
+    if (!jobs || jobs.length === 0) {
+      return NextResponse.json({ jobs: [] });
     }
 
     //arrange the listings in order listing.end_date soon to later

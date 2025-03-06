@@ -9,7 +9,30 @@ export async function GET(request) {
   try {
     connection = await createConnection();
 
-    const [listings] = await connection.query("SELECT * FROM listings");
+    // Updated query to select only specific fields from listings and join with partner data
+    const [listings] = await connection.query(`
+      SELECT 
+        l.id,
+        l.title,
+        l.slug,
+        l.creator_id,
+        l.verified,
+        l.categories,
+        l.location,
+        l.reward,
+        l.type,
+        l.partner_id,
+        l.end_date,
+        l.short_description,
+        p.name AS partner_name,
+        p.profile_photo_url AS partner_profile_photo_url
+      FROM listings l
+      LEFT JOIN partners p ON l.partner_id = p.id
+    `);
+
+    if (listings.length === 0) {
+      return NextResponse.json({ listings: null });
+    }
 
     if (listings.length === 0) {
       return NextResponse.json({ listings: null });

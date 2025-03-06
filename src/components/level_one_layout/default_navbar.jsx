@@ -18,13 +18,13 @@ import {
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext.jsx";
-import { signOut } from 'next-auth/react'
+import { signOut } from "next-auth/react";
 // import UnderDevelopment from "@/components/level_three_layout/under_development";
 import { toast, Slide } from "react-toastify";
-import NavbarShimmer from '@/components/level_three_layout/NavbarShimmer';
+import NavbarShimmer from "@/components/level_three_layout/NavbarShimmer";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 // const DefaultNavbar = ({user}: DefaultNavbarProps) => {
 const DefaultNavbar = React.memo(() => {
@@ -44,24 +44,23 @@ const DefaultNavbar = React.memo(() => {
     };
     checkMobile();
 
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  useEffect(()=>{
-    if(user && user?.email){
-      setIsLoggedIn(true)
-      setLoding(false)
-    } else{
-      if(status == "unauthenticated"){
-        setLoding(false)
-        setIsLoggedIn(false)
-      } else if(status == "loading"){
-        setLoding(true)
+  useEffect(() => {
+    if (user && user?.email) {
+      setIsLoggedIn(true);
+      setLoding(false);
+    } else {
+      if (status == "unauthenticated") {
+        setLoding(false);
+        setIsLoggedIn(false);
+      } else if (status == "loading") {
+        setLoding(true);
       }
     }
-    
-  }, [user, status])
+  }, [user, status]);
 
   // Show shimmer while loading
   if (loding) {
@@ -88,7 +87,6 @@ const DefaultNavbar = React.memo(() => {
     setMenuOpen(!menuOpen);
   };
 
-  
   return (
     <div className="sticky top-0 z-50 drop-shadow-sm">
       <div className="flex justify-between items-center bg-white shadow md:px-12 py-[10px] px-4">
@@ -101,7 +99,13 @@ const DefaultNavbar = React.memo(() => {
             )}
           </button>
           <div className="md:hidden ml-3">
-            <Image height={80} width={120} src="/images/logo.png" alt="wizz" className="transition-all duration-300 ease-in-out" />
+            <Image
+              height={80}
+              width={120}
+              src="/images/logo.png"
+              alt="wizz"
+              className="transition-all duration-300 ease-in-out"
+            />
           </div>
         </div>
 
@@ -141,33 +145,33 @@ const DefaultNavbar = React.memo(() => {
                     <ArrowRightCircleIcon className="h-5 w-5 ml-2 md:ml-4" />
                   </button>
                 </Link>
-                // <></>
               ) : (
+                // <></>
                 <Link href="/dashboard">
-                <button
-                  type="submit"
-                  className={`text-gray-800 flex justify-center gap-2 items-center mx-auto text-basebackdrop-blur-sm lg:font-semibold isolation-auto ${
-                    isMobile
-                      ? ""
-                      : "border-[#75EDA6]   bg-gray-50 border-2  rounded-full group"
-                  } before:absolute before:w-full before:transition-all before:duration-700 before:hover:w-full before:-left-full before:hover:left-0 before:rounded-full before:bg-[#2FCC71] hover:text-gray-50 before:-z-10 before:aspect-square before:hover:scale-150 before:hover:duration-700 relative z-10 px-4 py-2 overflow-hidden ${
-                    isMobile ? "" : "border-2"
-                  } rounded-full group`}
-                >
-                  {!isMobile && <span>Switch to partner</span>}
-                  <svg
-                    className={`w-7 h-7 ${
-                      isMobile ? "mx-auto" : ""
-                    } group-hover:rotate-90 text-gray-50 ease-linear duration-300 rounded-full border border-gray-700 group-hover:border-none p-2 rotate-45`}
-                    viewBox="0 0 16 19"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <button
+                    type="submit"
+                    className={`text-gray-800 flex justify-center gap-2 items-center mx-auto text-basebackdrop-blur-sm lg:font-semibold isolation-auto ${
+                      isMobile
+                        ? ""
+                        : "border-[#75EDA6]   bg-gray-50 border-2  rounded-full group"
+                    } before:absolute before:w-full before:transition-all before:duration-700 before:hover:w-full before:-left-full before:hover:left-0 before:rounded-full before:bg-[#2FCC71] hover:text-gray-50 before:-z-10 before:aspect-square before:hover:scale-150 before:hover:duration-700 relative z-10 px-4 py-2 overflow-hidden ${
+                      isMobile ? "" : "border-2"
+                    } rounded-full group`}
                   >
-                    <path
-                      d="M7 18C7 18.5523 7.44772 19 8 19C8.55228 19 9 18.5523 9 18H7ZM8.70711 0.292893C8.31658 -0.0976311 7.68342 -0.0976311 7.29289 0.292893L0.928932 6.65685C0.538408 7.04738 0.538408 7.68054 0.928932 8.07107C1.31946 8.46159 1.95262 8.46159 2.34315 8.07107L8 2.41421L13.6569 8.07107C14.0474 8.46159 14.6805 8.46159 15.0711 8.07107C15.4616 7.68054 15.4616 7.04738 15.0711 6.65685L8.70711 0.292893ZM9 18L9 1H7L7 18H9Z"
-                      className="fill-gray-800 group-hover:fill-gray-800"
-                    ></path>
-                  </svg>
-                </button>
+                    {!isMobile && <span>Switch to partner</span>}
+                    <svg
+                      className={`w-7 h-7 ${
+                        isMobile ? "mx-auto" : ""
+                      } group-hover:rotate-90 text-gray-50 ease-linear duration-300 rounded-full border border-gray-700 group-hover:border-none p-2 rotate-45`}
+                      viewBox="0 0 16 19"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M7 18C7 18.5523 7.44772 19 8 19C8.55228 19 9 18.5523 9 18H7ZM8.70711 0.292893C8.31658 -0.0976311 7.68342 -0.0976311 7.29289 0.292893L0.928932 6.65685C0.538408 7.04738 0.538408 7.68054 0.928932 8.07107C1.31946 8.46159 1.95262 8.46159 2.34315 8.07107L8 2.41421L13.6569 8.07107C14.0474 8.46159 14.6805 8.46159 15.0711 8.07107C15.4616 7.68054 15.4616 7.04738 15.0711 6.65685L8.70711 0.292893ZM9 18L9 1H7L7 18H9Z"
+                        className="fill-gray-800 group-hover:fill-gray-800"
+                      ></path>
+                    </svg>
+                  </button>
                 </Link>
               )}
 
@@ -198,12 +202,13 @@ const DefaultNavbar = React.memo(() => {
                     <ChevronDownIcon className="h-4 w-4 text-gray-600" />
                   </button>
                   {profileOpen && (
-                    <motion.div 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }}   
-                    exit={{ opacity: 0, y: 10 }}     
-                    transition={{ duration: 0.2 }}   
-                    className="absolute right-0 mt-[24px] w-[12.3rem] bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-[24px] w-[12.3rem] bg-white border border-gray-200 rounded-md shadow-lg z-10"
+                    >
                       <ul className="py-1">
                         <li className="px-4 py-[9px] text-gray-500 hover:bg-gray-100 cursor-pointer font-medium">
                           <Link
@@ -254,17 +259,12 @@ const DefaultNavbar = React.memo(() => {
                             Get Help
                           </a>
                         </li>
-                        
+
                         <li className="px-4 py-[9px] text-red-500 hover:bg-gray-100 cursor-pointer font-medium">
-                        <button onClick={() => signOut()}>
-                              <div
-                                className="block w-full h-full"
-                              >
-                                Logout
-                              </div>
-                              </button>
+                          <button onClick={() => signOut()}>
+                            <div className="block w-full h-full">Logout</div>
+                          </button>
                         </li>
-                        
                       </ul>
                     </motion.div>
                   )}
@@ -326,76 +326,75 @@ const DefaultNavbar = React.memo(() => {
             <ul>
               {/* Top Section - First three items */}
               <Link href="/">
-              <li
-                onClick={() => handleActiveItem("overview")}
-                className={`flex items-center py-4 pr-4 cursor-pointer transition-colors duration-300 ease-in-out ${
-                  activeItem === "overview"
-                    ? "text-green-500 font-semibold"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
-              >
-                {activeItem === "overview" && (
-                  <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
-                )}
-                <HomeIcon className="h-6 w-6 mr-5" />
-                <span>Overview</span>
-              </li>
+                <li
+                  onClick={() => handleActiveItem("overview")}
+                  className={`flex items-center py-4 pr-4 cursor-pointer transition-colors duration-300 ease-in-out ${
+                    activeItem === "overview"
+                      ? "text-green-500 font-semibold"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  {activeItem === "overview" && (
+                    <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
+                  )}
+                  <HomeIcon className="h-6 w-6 mr-5" />
+                  <span>Overview</span>
+                </li>
               </Link>
-              
-              <Link href="/">   
-              <li
-                onClick={() => handleActiveItem("bounties")}
-                className={`flex items-center py-4 pr-4 cursor-pointer transition-colors duration-300 ease-in-out ${
-                  activeItem === "bounties"
-                    ? "text-green-500 font-semibold"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
-              >
-                {activeItem === "bounties" && (
-                  <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
-                )}
-                <BriefcaseIcon className="h-6 w-6 mr-5" />
-                <span>Bounties</span>
-              </li>
-              </Link> 
-              
-              {/* <Link href="/hirings">   */}
-              <li
-                onClick={() => {
-                  handleActiveItem("hirings")
-                  toast.info(
-                    "Feature Under Development! Stay tuned for updates.",
-                    {
-                      position: "top-center",
-                      autoClose: 5000,
-                      hideProgressBar: false,
-                      closeOnClick: true,
-                      pauseOnHover: true,
-                      draggable: true,
-                      progress: undefined,
-                      theme: "light",
-                      transition: Slide,
-                    }
-                  );
-                }}
-                
-                className={`flex items-center py-4 pr-4 cursor-pointer transition-colors duration-300 ease-in-out ${
-                  activeItem === "hirings"
-                    ? "text-green-500 font-semibold"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
-              >
-                {activeItem === "hirings" && (
-                  <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
-                )}
-                <UserGroupIcon className="h-6 w-6 mr-5" />
-                <span>Hirings</span>
-              </li>
-              {/* </Link> */}
+
+              <Link href="/bounty">
+                <li
+                  onClick={() => handleActiveItem("bounties")}
+                  className={`flex items-center py-4 pr-4 cursor-pointer transition-colors duration-300 ease-in-out ${
+                    activeItem === "bounties"
+                      ? "text-green-500 font-semibold"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  {activeItem === "bounties" && (
+                    <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
+                  )}
+                  <BriefcaseIcon className="h-6 w-6 mr-5" />
+                  <span>Bounties</span>
+                </li>
+              </Link>
+
+              <Link href="/hirings">
+                <li
+                  onClick={() => {
+                    handleActiveItem("hirings");
+                    // toast.info(
+                    //   "Feature Under Development! Stay tuned for updates.",
+                    //   {
+                    //     position: "top-center",
+                    //     autoClose: 5000,
+                    //     hideProgressBar: false,
+                    //     closeOnClick: true,
+                    //     pauseOnHover: true,
+                    //     draggable: true,
+                    //     progress: undefined,
+                    //     theme: "light",
+                    //     transition: Slide,
+                    //   }
+                    // );
+                  }}
+                  className={`flex items-center py-4 pr-4 cursor-pointer transition-colors duration-300 ease-in-out ${
+                    activeItem === "hirings"
+                      ? "text-green-500 font-semibold"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  {activeItem === "hirings" && (
+                    <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
+                  )}
+                  <UserGroupIcon className="h-6 w-6 mr-5" />
+                  <span>Hirings</span>
+                </li>
+              </Link>
 
               <li
                 onClick={() => {
-                  handleActiveItem("projects")
+                  handleActiveItem("projects");
                   toast.info(
                     "Feature Under Development! Stay tuned for updates.",
                     {
@@ -426,7 +425,7 @@ const DefaultNavbar = React.memo(() => {
 
               <li
                 onClick={() => {
-                  handleActiveItem("grants")
+                  handleActiveItem("grants");
                   toast.info(
                     "Feature Under Development! Stay tuned for updates.",
                     {
