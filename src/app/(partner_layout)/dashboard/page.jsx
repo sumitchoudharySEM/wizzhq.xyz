@@ -83,7 +83,7 @@ export default function Home() {
       try {
         await Promise.all([fetchListings(), fetchJobs()]);
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 300); // Delay hiding loading state
       }
     };
 
@@ -109,30 +109,6 @@ export default function Home() {
     endDate.setHours(0, 0, 0, 0);
     return currentDate > endDate ? "completed" : "active";
   }, []);
-
-  // Check if the partner name matches the search term for a listing
-  const checkPartnerNameMatch = React.useCallback(
-    async (partnerId, searchTerm) => {
-      try {
-        const response = await fetch(
-          `/api/partners_listing/partner?id=${partnerId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const data = await response.json();
-        const partnerName = data.partner?.name || "";
-        return partnerName.toLowerCase().includes(searchTerm.toLowerCase());
-      } catch (error) {
-        console.error("Error fetching partner data:", error);
-        return false;
-      }
-    },
-    []
-  );
 
   // Get the time remaining in days between now and the end date
   const getTimeRemaining = React.useCallback((endDateString) => {
@@ -187,11 +163,8 @@ export default function Home() {
             const matchesDescription = listing.short_description
               ?.toLowerCase()
               .includes(searchTerm.toLowerCase());
-            const matchesPartner = await checkPartnerNameMatch(
-              listing.partner_id,
-              searchTerm
-            );
-            return matchesTitle || matchesDescription || matchesPartner
+            
+            return matchesTitle || matchesDescription
               ? listing
               : null;
           }
@@ -204,11 +177,8 @@ export default function Home() {
           const matchesDescription = job.description
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase());
-          const matchesPartner = await checkPartnerNameMatch(
-            job.partner_id,
-            searchTerm
-          );
-          return matchesTitle || matchesDescription || matchesPartner
+          
+          return matchesTitle || matchesDescription
             ? job
             : null;
         });
@@ -241,10 +211,15 @@ export default function Home() {
           return statusA === "active" ? -1 : 1;
         }
 
-        // If both have same status, sort by end date
-        const timeRemainingA = getTimeRemaining(a.end_date);
-        const timeRemainingB = getTimeRemaining(b.end_date);
-        return timeRemainingA - timeRemainingB;
+         // If both have same status, sort by end date
+         const timeRemainingA = getTimeRemaining(a.end_date);
+         const timeRemainingB = getTimeRemaining(b.end_date);
+         if (statusA == "active" && statusB == "active") {
+           return timeRemainingA - timeRemainingB;
+         }
+         if (statusA !== "active" && statusB !== "active") {
+           return timeRemainingB - timeRemainingA;
+         }
       });
 
       setCombinedItems(combinedItems);
@@ -265,7 +240,6 @@ export default function Home() {
     isSearching,
     checkListingStatus,
     checkJobStatus,
-    checkPartnerNameMatch,
     getTimeRemaining,
   ]);
 

@@ -177,7 +177,7 @@ const DefaultSidebar = () => {
           {/* Projects */}
           <li
             onClick={() => {
-              handleActiveItem("projects");
+              // handleActiveItem("projects");
               toast.info("Feature Under Development! Stay tuned for updates.", {
                 position: "top-center",
                 autoClose: 5000,
@@ -212,7 +212,7 @@ const DefaultSidebar = () => {
                     : ""
                 }`}
               >
-                Projects
+                Freelance
               </span>
             )}
           </li>
@@ -220,7 +220,7 @@ const DefaultSidebar = () => {
           {/* Grants */}
           <li
             onClick={() => {
-              handleActiveItem("grants");
+              // handleActiveItem("grants");
               toast.info("Feature Under Development! Stay tuned for updates.", {
                 position: "top-center",
                 autoClose: 5000,
@@ -251,7 +251,7 @@ const DefaultSidebar = () => {
                   activeItem === "grants" ? "text-green-500 font-semibold" : ""
                 }`}
               >
-                Grants
+                Hackathons
               </span>
             )}
           </li>

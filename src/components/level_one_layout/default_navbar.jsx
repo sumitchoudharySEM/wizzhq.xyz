@@ -394,7 +394,7 @@ const DefaultNavbar = React.memo(() => {
 
               <li
                 onClick={() => {
-                  handleActiveItem("projects");
+                  // handleActiveItem("projects");
                   toast.info(
                     "Feature Under Development! Stay tuned for updates.",
                     {
@@ -420,12 +420,12 @@ const DefaultNavbar = React.memo(() => {
                   <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
                 )}
                 <CalendarIcon className="h-6 w-6 mr-5" />
-                <span>Projects</span>
+                <span>Freelance</span>
               </li>
 
               <li
                 onClick={() => {
-                  handleActiveItem("grants");
+                  // handleActiveItem("grants");
                   toast.info(
                     "Feature Under Development! Stay tuned for updates.",
                     {
@@ -451,7 +451,7 @@ const DefaultNavbar = React.memo(() => {
                   <div className="absolute left-0 h-8 w-[4.5px] bg-green-500 rounded-r transition-all duration-300 ease-in-out"></div>
                 )}
                 <AcademicCapIcon className="h-6 w-6 mr-5" />
-                <span>Grants</span>
+                <span>Hackathons</span>
               </li>
             </ul>
 

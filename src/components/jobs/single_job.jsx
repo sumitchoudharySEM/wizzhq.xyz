@@ -101,7 +101,7 @@ const SingleJob = ({ key, job }) => {
         <div className="flex items-center gap-2 w-full">
           <div className="w-16 h-16 rounded-[10px] border flex-shrink-0">
             <Image
-              src={job.partner_profile_photo_url || ""}
+              src={job.partner_profile_photo_url}
               width={64}
               height={64}
               alt="partner Logo"

@@ -109,8 +109,7 @@ const SingleListing = ({ key, listing }) => {
           <div className="w-16 h-16 rounded-[10px] border flex-shrink-0">
             <Image
               src={
-                listing.partner_profile_photo_url ||
-                "/default-partner-image.png" // Fallback image if partner_profile_photo_url is null
+                listing.partner_profile_photo_url 
               }
               width={64}
               height={64}

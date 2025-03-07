@@ -77,11 +77,13 @@ export default function Home() {
 
   React.useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
+      setLoading(true); // Ensure loading starts
       try {
         await Promise.all([fetchListings(), fetchJobs()]);
+      } catch (error) {
+        console.log(error);
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 300); // Delay hiding loading state
       }
     };
 
@@ -242,7 +244,12 @@ export default function Home() {
         // If both have same status, sort by end date
         const timeRemainingA = getTimeRemaining(a.end_date);
         const timeRemainingB = getTimeRemaining(b.end_date);
-        return timeRemainingA - timeRemainingB;
+        if (statusA == "active" && statusB == "active") {
+          return timeRemainingA - timeRemainingB;
+        }
+        if (statusA !== "active" && statusB !== "active") {
+          return timeRemainingB - timeRemainingA;
+        }
       });
 
       setCombinedItems(combinedItems);
@@ -251,7 +258,8 @@ export default function Home() {
 
     const timeoutId = setTimeout(() => {
       filterItems();
-    }, 300);
+      setLoading(false);
+    }, 200);
 
     return () => clearTimeout(timeoutId);
   }, [
