@@ -33,12 +33,8 @@ export default function Home() {
 
       // Check if session exists and user is logged in
       if (data.listings.length !== 0) {
-        // Filter listings to only show those created by the current user
-        const userListings = data.listings.filter(
-          (listing) => listing.verified == 1
-        );
-        setListings(userListings);
-        setFilteredListings(userListings);
+        setListings(data.listings);
+        setFilteredListings(data.listings);
       } else {
         // If no user is logged in, set empty array
         setListings([]);
@@ -63,9 +59,8 @@ export default function Home() {
 
       // Only show jobs created by the current user (no verification check)
       if (fetchedJobs.length !== 0) {
-        const userJobs = fetchedJobs.filter((job) => job.verified === 1);
-        setJobs(userJobs);
-        setFilteredJobs(userJobs);
+        setJobs(fetchedJobs);
+        setFilteredJobs(fetchedJobs);
       } else {
         setJobs([]);
         setFilteredJobs([]);
@@ -83,7 +78,7 @@ export default function Home() {
       } catch (error) {
         console.log(error);
       } finally {
-        // setTimeout(() => setLoading(false), 300); // Delay hiding loading state
+        setTimeout(() => setLoading(false), 300); // Delay hiding loading state
       }
     };
 
@@ -128,7 +123,7 @@ export default function Home() {
   React.useEffect(() => {
     const filterItems = async () => {
       if (isSearching) return;
-      try{
+
       setIsSearching(true);
       let newFilteredListings = [...listings];
       let newFilteredJobs = [...jobs];
@@ -164,8 +159,8 @@ export default function Home() {
               ?.toLowerCase()
               .includes(searchTerm.toLowerCase());
             const matchesPartner = listing.partner_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
             return matchesTitle || matchesDescription || matchesPartner
               ? listing
               : null;
@@ -180,8 +175,8 @@ export default function Home() {
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase());
           const matchesPartner = job.partner_name
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase());
           return matchesTitle || matchesDescription || matchesPartner
             ? job
             : null;
@@ -228,15 +223,11 @@ export default function Home() {
 
       setCombinedItems(combinedItems);
       setIsSearching(false);
-    } catch (error){
-      console.log(error)
-    } finally {
-      setLoading(false);
-    }
     };
 
     const timeoutId = setTimeout(() => {
       filterItems();
+      setLoading(false);
     }, 200);
 
     return () => clearTimeout(timeoutId);
@@ -282,6 +273,17 @@ export default function Home() {
 
       {!loading && (
         <>
+          <div className="space-y-1 mt-6">
+            <p className="text-gray-900 text-lg md:text-xl font-semibold">
+              Admin Hub - Streamline Operations, Monitor, and Control
+              Seamlessly!
+            </p>
+            <p className="hidden md:block text-[#3b3d4e] text-base font-medium">
+              Stay in control with real-time insights, seamless management, and
+              powerful tools for effortless administration.
+            </p>
+          </div>
+
           {/* Search bar with category and status dropdown */}
           <SearchbarFilter
             onStatusChange={handleStatusChange}
