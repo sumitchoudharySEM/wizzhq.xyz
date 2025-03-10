@@ -78,8 +78,8 @@ export async function PUT(request: Request) {
 
       // 4. Check if the listing exists and belongs to the creator
       const [existingListings] = await connection.query(
-        "SELECT * FROM listings WHERE slug = ? AND creator_id = ?",
-        [slug, userId]
+        "SELECT * FROM listings WHERE slug = ?",
+        [slug]
       );
 
       if (!existingListings || existingListings.length === 0) {
