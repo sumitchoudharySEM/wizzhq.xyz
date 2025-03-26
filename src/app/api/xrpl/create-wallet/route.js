@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createConnection } from "@/lib/db";
 import { auth } from "../../../../../auth"; // Adjust path if needed
-const xrpl = require("xrpl");
+import xrpl from"xrpl";
 
 export async function POST(request) {
   let client;
