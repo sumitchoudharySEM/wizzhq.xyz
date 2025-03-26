@@ -9,7 +9,9 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Select from "react-select";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
+import { toast, Slide } from "react-toastify";
+import { Client, Wallet, xrpToDrops } from "xrpl";
+import Image from "next/image";
 
 const SubmissionLinkPreview = ({ url }) => {
   const [preview, setPreview] = useState(null);
@@ -20,7 +22,7 @@ const SubmissionLinkPreview = ({ url }) => {
       try {
         // Parse the URL if it's coming from submission_links array string
         let firstUrl = url;
-        if (typeof url === 'string' && url.startsWith('[')) {
+        if (typeof url === "string" && url.startsWith("[")) {
           const links = JSON.parse(url);
           firstUrl = links[0]; // Get only the first link
         }
@@ -62,7 +64,10 @@ const SubmissionLinkPreview = ({ url }) => {
         <div className="w-full h-full flex items-center justify-center bg-gray-100">
           <div className="text-center p-4">
             <h3 className="text-sm font-medium text-gray-900 truncate">
-              {preview?.title || (preview?.url ? new URL(preview.url).hostname : 'No preview available')}
+              {preview?.title ||
+                (preview?.url
+                  ? new URL(preview.url).hostname
+                  : "No preview available")}
             </h3>
           </div>
         </div>
@@ -72,9 +77,11 @@ const SubmissionLinkPreview = ({ url }) => {
 };
 
 const Page = () => {
-  const [listing, setListing] = useState(null);
+  const [listing, setListing] = useState(null); //listing
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState([]);
+  const [wallet, setWallet] = useState(null); // User's wallet
+  const [donationLoading, setDonationLoading] = useState({});
 
   const [availablePrizes, setAvailablePrizes] = useState([]);
   const [submissionPrizes, setSubmissionPrizes] = useState({});
@@ -105,6 +112,43 @@ const Page = () => {
     fetchListings();
   }, []);
 
+  // Fetch user's wallet
+  const fetchUserWallet = async () => {
+    if (!currentUser) return;
+
+    try {
+      const response = await fetch("/api/xrpl/check-wallet", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.wallet) {
+          const client = new Client("wss://s.altnet.rippletest.net:51233");
+          await client.connect();
+          const balance = await client.getXrpBalance(
+            data.wallet.public_address
+          );
+          await client.disconnect();
+
+          setWallet({
+            public_address: data.wallet.public_address,
+            seed: data.wallet.seed,
+            balance,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching wallet:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchListings();
+    if (session) fetchUserWallet();
+  }, [session]);
+
   // Fetch submissions with user data included
   useEffect(() => {
     async function fetchSubmissionsData() {
@@ -129,6 +173,105 @@ const Page = () => {
 
     fetchSubmissionsData();
   }, [listing]);
+
+  // Donation function
+  const donateXRP = async (submissionId, recipientUserId, amount) => {
+    if (!wallet) {
+      toast.error("You need to create an XRPL wallet first!");
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid amount!");
+      return;
+    }
+
+    // Set both isLoading and keep the amount
+  setDonationLoading((prev) => ({
+    ...prev,
+    [submissionId]: { amount: prev[submissionId]?.amount || amount, isLoading: true },
+  }));
+
+    let client;
+    try {
+      // Fetch recipient's public key
+      // Inside the donateXRP function, replace the existing fetch for recipient's public key with this:
+      let destination;
+      try {
+        const response = await fetch(
+          `/api/xrpl/get-public-key?userId=${recipientUserId}`
+        );
+        if (!response.ok) {
+          // Recipient has no wallet, create one
+          const clientForNewWallet = new Client(
+            "wss://s.altnet.rippletest.net:51233"
+          );
+          await clientForNewWallet.connect();
+          const fundResult = await clientForNewWallet.fundWallet();
+          const newWallet = fundResult.wallet;
+
+          // Save the new wallet for the recipient
+          const saveResponse = await fetch("/api/xrpl/save-wallet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: recipientUserId,
+              public_address: newWallet.address,
+              seed: newWallet.seed,
+            }),
+          });
+
+          if (!saveResponse.ok)
+            throw new Error("Failed to save recipient's new wallet");
+          destination = newWallet.address;
+          await clientForNewWallet.disconnect();
+
+          toast.info(`Created a wallet for the recipient!`, {
+            position: "top-center",
+            autoClose: 3000,
+            transition: Slide,
+          });
+        } else {
+          const data = await response.json();
+          destination = data.public_address;
+        }
+      } catch (err) {
+        console.error("Error handling recipient wallet:", err);
+        throw new Error(err.message || "Failed to process recipient wallet");
+      }
+
+      client = new Client("wss://s.altnet.rippletest.net:51233");
+      await client.connect();
+
+      const walletInstance = Wallet.fromSeed(wallet.seed);
+      const prepared = await client.autofill({
+        TransactionType: "Payment",
+        Account: walletInstance.address,
+        Amount: xrpToDrops(amount),
+        Destination: destination,
+      });
+
+      const signed = walletInstance.sign(prepared);
+      const tx = await client.submitAndWait(signed.tx_blob);
+
+      const newBalance = await client.getXrpBalance(walletInstance.address);
+      setWallet({ ...wallet, balance: newBalance });
+
+      toast.success(`Donated ${amount} XRP`, {
+        position: "top-center",
+        autoClose: 3000,
+        transition: Slide,
+      });
+    } catch (err) {
+      console.error("Error donating XRP:", err);
+      toast.error(err.message || "Failed to donate XRP");
+    } finally {
+      if (client) await client.disconnect();
+      setDonationLoading((prev) => ({
+        ...prev,
+        [submissionId]: { ...prev[submissionId], isLoading: false },
+      }));
+    }
+  };
 
   // Calculate number of bonus prizes assigned
   const calculateBonusPrizesAssigned = (prizes) => {
@@ -370,7 +513,8 @@ const Page = () => {
 
   return (
     <div className="max-w-screen-lg mx-auto mt-8 px-4 md:px-4 mb-44">
-      {!listing || (new Date(listing.end_date) > new Date() && !isListingCreator) ? (
+      {!listing ||
+      (new Date(listing.end_date) > new Date() && !isListingCreator) ? (
         <Submissions_Soon />
       ) : (
         <>
@@ -560,6 +704,49 @@ const Page = () => {
                           return null;
                         }
                       })()}
+                      {/* Donation UI */}
+                      {session ? (
+                        <div className="flex w-full gap-2 flex-col mt-2">
+                          <input
+                            type="number"
+                            placeholder="Enter XRP"
+                            value={donationLoading[submission.id]?.amount || ""}
+                            onChange={(e) =>
+                              setDonationLoading((prev) => ({
+                                ...prev,
+                                [submission.id]: {
+                                  ...prev[submission.id],
+                                  amount: e.target.value,
+                                },
+                              }))
+                            }
+                            className="flex-1 bg-white border border-gray-300 text-sm rounded-[6px] p-[7px] text-[#344054] focus:outline-none focus:ring-1 focus:ring-green-500"
+                            min="0"
+                            step="0.001"
+                          />
+                          <button
+                            onClick={() =>
+                              donateXRP(
+                                submission.id,
+                                submission.user_id,
+                                donationLoading[submission.id]?.amount
+                              )
+                            }
+                            disabled={donationLoading[submission.id]?.isLoading}
+                            className={`px-3 py-[7px] rounded-[6px] text-white text-sm font-semibold transition duration-200 ${
+                              donationLoading[submission.id]?.isLoading
+                                ? "bg-gray-400 cursor-not-allowed border-solid border-2 border-gray-400"
+                                : "bg-white hover:bg-slate-50 border-solid border-2 border-green-500"
+                            }`}
+                          >
+                            {donationLoading[submission.id]?.isLoading
+                              ? "Donating..."
+                              : <div className="flex items-center flex-row justify-center text-slate-950">Donate  <Image src="/images/tokens/xrpp.png" alt="XRP" height="36" width="36"></Image></div>}
+                          </button>
+                        </div>
+                      ) : (
+                        "SignIn to Donate"
+                      )}
                       {isListingCreator &&
                         IsInPartnerDashboard() &&
                         listing.rewarded_on == null && (

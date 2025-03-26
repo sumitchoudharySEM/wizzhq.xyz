@@ -14,6 +14,7 @@ import {
   ArrowLeftEndOnRectangleIcon,
   ChevronDownIcon,
   AcademicCapIcon,
+  WalletIcon, 
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
@@ -25,11 +26,12 @@ import NavbarShimmer from "@/components/level_three_layout/NavbarShimmer";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { Client, Wallet } from "xrpl";
 
 // const DefaultNavbar = ({user}: DefaultNavbarProps) => {
 const DefaultNavbar = React.memo(() => {
   const { user } = useUser();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loding, setLoding] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,6 +39,43 @@ const DefaultNavbar = React.memo(() => {
   const [activeItem, setActiveItem] = useState("overview");
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
+  ///////////////
+  const [wallet, setWallet] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
+
+  const checkExistingWallet = async () => {
+    if (!session?.user?.id) return;
+  
+    try {
+      const response = await fetch("/api/xrpl/check-wallet", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        if (data.wallet) {
+          // Fetch live balance
+          const client = new Client("wss://s.altnet.rippletest.net:51233");
+          await client.connect();
+          const balance = await client.getXrpBalance(data.wallet.public_address);
+          await client.disconnect();
+  
+          setWallet({
+            public_address: data.wallet.public_address,
+            seed: data.wallet.seed,
+            balance,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error checking wallet:", err);
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,6 +91,7 @@ const DefaultNavbar = React.memo(() => {
     if (user && user?.email) {
       setIsLoggedIn(true);
       setLoding(false);
+      checkExistingWallet(); // Check for existing wallet on load
     } else {
       if (status == "unauthenticated") {
         setLoding(false);
@@ -87,6 +127,72 @@ const DefaultNavbar = React.memo(() => {
     setMenuOpen(!menuOpen);
   };
 
+ // Check if the user already has a wallet
+
+
+const createWallet = async () => {
+  if (!isLoggedIn) {
+    setError("You must be signed in to create a wallet.");
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  let client;
+  try {
+    client = new Client("wss://s.altnet.rippletest.net:51233");
+    console.log("Connecting to XRPL Testnet...");
+    await client.connect();
+    console.log("Connected to XRPL Testnet");
+
+    const fundResult = await client.fundWallet();
+    const newWallet = fundResult.wallet;
+
+    const response = await fetch("/api/xrpl/save-wallet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: session.user.id,
+        public_address: newWallet.address,
+        seed: newWallet.seed,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save wallet to server");
+    }
+
+    const balance = await client.getXrpBalance(newWallet.address);
+    setWallet({
+      public_address: newWallet.address,
+      seed: newWallet.seed,
+      balance,
+    });
+  } catch (err) {
+    console.error("Error creating wallet:", err);
+    setError(err.message || "Failed to create wallet");
+  } finally {
+    if (client) await client.disconnect();
+    setLoading(false);
+  }
+};
+
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text);
+  toast.success("Copied to clipboard!", {
+    position: "top-center",
+    autoClose: 2000,
+    transition: Slide,
+  });
+};
+
+const toggleWalletDropdown = () => {
+  setWalletDropdownOpen(!walletDropdownOpen);
+};
+
   return (
     <div className="sticky top-0 z-50 drop-shadow-sm">
       <div className="flex justify-between items-center bg-white shadow md:px-12 py-[10px] px-4">
@@ -115,6 +221,65 @@ const DefaultNavbar = React.memo(() => {
           <div className="flex items-center w-full justify-end lg:justify-between gap-5">
             {/* Left-aligned search bar */}
             <div className="flex-grow hidden lg:flex items-center w-[22rem] max-w-[25rem]">
+            {wallet ? (
+                <div className="relative">
+                  <button
+                    onClick={toggleWalletDropdown}
+                    className="flex items-center gap-2 text-gray-800 hover:text-green-500"
+                  >
+                    <WalletIcon className="h-6 w-6" />
+                    <span  >{wallet.balance} XRP</span>
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </button>
+                  {walletDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-[20rem] bg-white border border-gray-200 rounded-md shadow-lg z-10 p-4"
+                    >
+                      <div className="mb-2">
+                        <h2 className="text-md text-neutral-800" >Testnet </h2>
+                        <br />
+                        <hr />
+                        <br />
+                        <p className="text-sm text-slate-950">Public Address</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs break-all text-slate-700">{wallet.public_address}</p>
+                          <button
+                            onClick={() => copyToClipboard(wallet.public_address)}
+                            className="text-green-500 hover:text-green-700"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-950">Secret Key</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs break-all text-slate-700">{wallet.seed}</p>
+                          <button
+                            onClick={() => copyToClipboard(wallet.seed)}
+                            className="text-green-500 hover:text-green-700"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={createWallet}
+                  disabled={loading}
+                  className="px-4 py-1 text-slate-950 rounded-md transition duration-200 bg-white hover:bg-slate-50 border-solid border-2 border-green-500 h-34"
+                >
+                  {loading ? "Creating Wallet..." : <div className="flex items-center flex-row justify-center text-slate-950">Create Wallet <Image src="/images/tokens/xrpp.png" alt="XRP" height="34" width="34"></Image></div>}
+                </button>
+              )}
+              {error && <p className="text-red-500 text-sm">{error}</p>}
               {/* <div className="flex w-full rounded-md border-2 border-gray-200 overflow-hidden">
                 <input
                   type="text"
